@@ -40,6 +40,8 @@ public class FunctionView extends View {
     private int mLowCircleColor;
     private int mTextColor;
     private List<Element> elements;
+    private boolean isDrawNum;
+    private String numUnit;
     private float max;
     private float min;
     private int scaleX;
@@ -210,7 +212,7 @@ public class FunctionView extends View {
     private void drawFunction(Canvas canvas, int drawType, float value, float x1, float y1, float x2, float y2) {
         Paint circlePaint = null;
         Paint linePaint = null;
-        String text = String.valueOf(value);
+        String text = String.valueOf(value) + numUnit;
         float textX,textY;
         if (drawType == TOP) {
             circlePaint = mHeightCirclePaint;
@@ -237,7 +239,9 @@ public class FunctionView extends View {
         }
         //canvas.drawLine(x1+(x2-x1)*scale,y1+(y2-y1)*scale,x2+(x1-x2)*scale,y2+(y1-y2)*scale,mLinePaint);
         canvas.drawCircle(x1, y1, mRadius, circlePaint);
-        canvas.drawText(text,textX,textY,mTextPaint);
+        if(isDrawNum) {
+            canvas.drawText(text, textX, textY, mTextPaint);
+        }
     }
 
     /**
@@ -248,6 +252,7 @@ public class FunctionView extends View {
         animationScale = 1l;
         drawFlag = false;
         if(null == ta) {
+            isDrawNum = true;
             mRadius = 10f;
             mLineStrokeWidth = 8f;
             mCircleStrokeWidth = 8f;
@@ -258,6 +263,8 @@ public class FunctionView extends View {
             mTextSize = 16f;
             mTextColor = Color.YELLOW;
         }else{
+            numUnit = ta.getString(R.styleable.FunctionView_numUnit);
+            isDrawNum = ta.getBoolean(R.styleable.FunctionView_isDrawNum,true);
             mRadius = ta.getFloat(R.styleable.FunctionView_radius,10f);
             mLineStrokeWidth = ta.getFloat(R.styleable.FunctionView_lineStrokeWidth,8f);
             mCircleStrokeWidth = ta.getFloat(R.styleable.FunctionView_circleStrokeWidth,8f);
@@ -368,6 +375,24 @@ public class FunctionView extends View {
 
     public float getAnimationScale() {
         return animationScale;
+    }
+
+    public boolean isDrawNum() {
+        return isDrawNum;
+    }
+
+    public String getNumUnit() {
+        return numUnit;
+    }
+
+    public void setNumUnit(String numUnit) {
+        this.numUnit = numUnit;
+        invalidate();
+    }
+
+    public void setDrawNum(boolean drawNum) {
+        isDrawNum = drawNum;
+        invalidate();
     }
 
     public void setRadius(float mRadius) {
