@@ -12,5 +12,6 @@
         <attr name="textColor" format="color"/>
         <attr name="isDrawNum" format="boolean"/>
         <attr name="numUnit" format="string"/>
+        <attr name="maxCount" format="integer"/>
     </declare-styleable>
 </resources>
