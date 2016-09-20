@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="FunctionView">
-        <attr name="radius" format="float"/>
-        <attr name="lineStrokeWidth" format="float"/>
-        <attr name="circleStrokeWidth" format="float"/>
-        <attr name="textSize" format="float"/>
+        <attr name="radius" format="dimension"/>
+        <attr name="lineStrokeWidth" format="dimension"/>
+        <attr name="circleStrokeWidth" format="dimension"/>
+        <attr name="textSize" format="dimension"/>
         <attr name="heightLineColor" format="color"/>
         <attr name="lowLineColor" format="color"/>
         <attr name="heightCircleColor" format="color"/>

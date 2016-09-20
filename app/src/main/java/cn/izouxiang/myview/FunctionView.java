@@ -1,4 +1,4 @@
-package cn.izouxiang.myview;
+package cn.izouxiang.androidweather.custom_view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -15,11 +15,12 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.List;
+
+import cn.izouxiang.androidweather.R;
 
 
 /**
@@ -31,18 +32,31 @@ public class FunctionView extends View {
     private Paint mHeightCirclePaint;
     private Paint mLowCirclePaint;
     private Paint mTextPaint;
+    //圆的半径
     private float mRadius;
+    //线的宽度
     private float mLineStrokeWidth;
+    //圆的宽度
     private float mCircleStrokeWidth;
+    //文字大小
     private float mTextSize;
+    //上面线的颜色
     private int mHeightLineColor;
+    //下面线的颜色
     private int mLowLineColor;
+    //上面圆的颜色
     private int mHeightCircleColor;
+    //下面圆的颜色
     private int mLowCircleColor;
+    //文本颜色
     private int mTextColor;
+    //装数据的list
     private List<Element> elements;
+    //是否画数字
     private boolean isDrawNum;
+    //数字所带的单位
     private String numUnit;
+    //一页最多显示的个数
     private int maxCount;
     private float max;
     private float min;
@@ -56,10 +70,7 @@ public class FunctionView extends View {
     private long lastTouchTime;
     private boolean drawFlag;
     private String TAG = "TEST";
-    private int BOTTOM = 0;
-    private int TOP = 1;
     private float animationScale;
-    private TypedArray ta;
     private ObjectAnimator mAnimator;
     private int maxScrollX;
     private int minScrollX = 0;
@@ -67,21 +78,18 @@ public class FunctionView extends View {
 
     public FunctionView(Context context) {
         super(context);
-        initView();
-        Log.d(TAG, "FunctionView: 1");
+        initView(null);
     }
 
     public FunctionView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        ta = context.obtainStyledAttributes(attrs,R.styleable.FunctionView);
-        initView();
-        Log.d(TAG, "FunctionView: 2");
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.FunctionView);
+        initView(ta);
     }
 
     public FunctionView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initView();
-        Log.d(TAG, "FunctionView: 3");
+        initView(null);
     }
 
     /**
@@ -109,13 +117,11 @@ public class FunctionView extends View {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        Log.d(TAG, "onSizeChanged: ..." + w + ":" + h);
         defWidth = w;
         defHeight = h;
         if(elements != null && elements.size() > maxCount) {
             w = (int) (w * 0.8 / maxCount * elements.size() + w * 0.2);
         }
-        Log.d(TAG, "onSizeChanged: " + w);
         super.onSizeChanged(w, h, oldw, oldh);
         height = h;
         width = w;
@@ -129,18 +135,16 @@ public class FunctionView extends View {
         int x = (int) event.getX();
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                Log.d(TAG, "onTouchEvent: ...");
                 mLastX = x;
-                //lastTouchTime = System.currentTimeMillis();
+                lastTouchTime = System.currentTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
-                //long end = System.currentTimeMillis();
-//                if( end - lastTouchTime < 10){
-//                    break;
-//                }
-                //lastTouchTime = end;
+                long end = System.currentTimeMillis();
+                if( end - lastTouchTime < 10){
+                    break;
+                }
+                lastTouchTime = end;
                 int dx = mLastX - x;
-                Log.d(TAG, "onTouchEvent: " + getScrollX());
                 if(getScrollX() < minScrollX  && dx < 0){
                     dx = 0;
                 }
@@ -172,8 +176,8 @@ public class FunctionView extends View {
         Element nowElem;
         Element nextElem = elements.get(0);
         float nextX = (float) (0.1 * defWidth);
-        float nextY1 = (float) (0.2 * height + (max - nextElem.height) * scaleY) * animationScale;
-        float nextY2 = (float) (0.2 * height + (max - nextElem.low) * scaleY) * animationScale;
+        float nextY1 = (float) (0.15 * height + (max - nextElem.height) * scaleY) * animationScale;
+        float nextY2 = (float) (0.15 * height + (max - nextElem.low) * scaleY) * animationScale;
         for (int i = 0; i < elements.size(); i++) {
             nowX = nextX;
             nowY1 = nextY1;
@@ -183,8 +187,8 @@ public class FunctionView extends View {
             if(i < elements.size() - 1){
                 nextElem = elements.get(i + 1);
                 nextX = (float) (0.1 * defWidth + (i + 1) * scaleX);
-                nextY1 = (float) (0.2 * height + (max - nextElem.height) * scaleY) * animationScale;
-                nextY2 = (float) (0.2 * height + (max - nextElem.low) * scaleY) * animationScale;
+                nextY1 = (float) (0.15 * height + (max - nextElem.height) * scaleY) * animationScale;
+                nextY2 = (float) (0.15 * height + (max - nextElem.low) * scaleY) * animationScale;
                 //如果不是最后一个点，就画直线
                 drawLine(canvas,mHeightLinePaint,nowX,nowY1,nextX,nextY1);//上直线
                 drawLine(canvas,mLowLinePaint,nowX,nowY2,nextX,nextY2);//下直线
@@ -203,6 +207,18 @@ public class FunctionView extends View {
                         value ,
                         nowX - mRadius, nowY2 + bounds.height() + mRadius * 2 ,
                         mTextPaint);//下值
+            }
+            //画类型
+            String type= nowElem.type;
+            if(!TextUtils.isEmpty(type)){
+                Rect bounds = new Rect();
+                mTextPaint.getTextBounds(type,0,type.length(),bounds);
+                canvas.drawText(
+                        nowElem.type,
+                        nowX - bounds.width() / 2,
+                        (float) (0.8 * height),
+                        mTextPaint
+                );
             }
             //画标题
             String title = nowElem.title;
@@ -229,115 +245,6 @@ public class FunctionView extends View {
         }
     }
 
-
-    protected void onDraw1(Canvas canvas) {
-        if(!drawFlag){
-            return ;
-        }
-        Log.d(TAG, "onDraw: ...");
-        if (elements == null || elements.size() < 2) {
-            return;
-        }
-        for (int i = 0; i < elements.size(); i++) {
-            Element elem1 = elements.get(i);
-            // 如果是最后一个点，点1点2为同一个点；
-            if (elements.size() - 1 == i) {
-                float x = (float) (0.1 * defWidth + i * scaleX);
-                float y = (float) (0.2 * height + (max - elem1.height) * scaleY) * animationScale;
-                drawFunction(
-                        canvas,
-                        TOP,
-                        elem1.height,
-                        x,
-                        y,
-                        x,
-                        y
-                        );
-                y = (float) (0.2 * height + (max - elem1.low) * scaleY) * animationScale;
-                drawFunction(
-                        canvas,
-                        BOTTOM,
-                        elem1.low,
-                        x,
-                        y,
-                        x,
-                        y
-                );
-
-            } else { //否则第二个点为下一个点
-                Element elem2 = elements.get(i + 1);
-                drawFunction(
-                        canvas,
-                        TOP,
-                        elem1.height,
-                        (float) (0.1 * defWidth + i * scaleX),
-                        (float) (0.2 * height + (max - elem1.height) * scaleY) * animationScale,
-                        (float) (0.1 * defWidth + (i + 1) * scaleX),
-                        (float) (0.2 * height + (max - elem2.height) * scaleY) * animationScale
-                );
-                drawFunction(
-                        canvas,
-                        BOTTOM,
-                        elem1.low,
-                        (float) (0.1 * defWidth + i * scaleX),
-                        (float) (0.2 * height + (max - elem1.low) * scaleY) * animationScale,
-                        (float) (0.1 * defWidth + (i + 1) * scaleX),
-                        (float) (0.2 * height + (max - elem2.low) * scaleY) * animationScale
-                );
-            }
-            //绘制标题
-            String title = elem1.title;
-            if(!TextUtils.isEmpty(title)){
-                Rect bounds = new Rect();
-                mTextPaint.getTextBounds(title,0,title.length(),bounds);
-                canvas.drawText(
-                        elem1.title,
-                        (float) (0.1 * defWidth + i * scaleX) - bounds.width() / 2,
-                        (float) (0.9 * height),
-                        mTextPaint
-                        );
-            }
-        }
-
-    }
-
-    //画两个点之间的连接线，并且以第一个点为圆心画圆
-    private void drawFunction(Canvas canvas, int drawType, float value, float x1, float y1, float x2, float y2) {
-        Paint circlePaint ;
-        Paint linePaint;
-        String text = String.valueOf(value) + numUnit;
-        float textX,textY;
-        if (drawType == TOP) {
-            circlePaint = mHeightCirclePaint;
-            linePaint = mHeightLinePaint;
-            textX = x1 - mRadius;
-            textY = y1 - mRadius * 2;
-
-        } else if (drawType == BOTTOM) {
-            circlePaint = mLowCirclePaint;
-            linePaint = mLowLinePaint;
-            Rect bounds = new Rect();
-            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-            textX = x1 - mRadius;
-            textY = y1 + bounds.height() + mRadius * 2;
-        } else {
-            throw new RuntimeException("drawType can't resolve");
-        }
-        if(x1 != x2 || y1 != y2) {
-            float scale = (float) (mRadius / Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)));
-            Path path = new Path();
-            path.moveTo(x1 + (x2 - x1) * scale, y1 + (y2 - y1) * scale);
-            path.lineTo(x2 + (x1 - x2) * scale, y2 + (y1 - y2) * scale);
-            canvas.drawPath(path, linePaint);
-        }
-        //canvas.drawLine(x1+(x2-x1)*scale,y1+(y2-y1)*scale,x2+(x1-x2)*scale,y2+(y1-y2)*scale,mLinePaint);
-        canvas.drawCircle(x1, y1, mRadius, circlePaint);
-        if(isDrawNum) {
-            canvas.drawText(text, textX, textY, mTextPaint);
-        }
-    }
-
-
     /**
      * 测量比例
      */
@@ -349,7 +256,6 @@ public class FunctionView extends View {
         if (!drawFlag) {
             return;
         }
-        Log.d(TAG, "measureScale: ...");
         max = elements.get(0).height;
         min = elements.get(0).low;
         for (Element element : elements) {
@@ -371,9 +277,9 @@ public class FunctionView extends View {
 
     /**
      * 初始化View
+     * @param ta
      */
-    public void initView() {
-        Log.d(TAG, "initView: ...");
+    public void initView(TypedArray ta) {
         animationScale = 1f;
         drawFlag = false;
         if(null == ta) {
@@ -395,24 +301,28 @@ public class FunctionView extends View {
                 numUnit = "";
             }
             isDrawNum = ta.getBoolean(R.styleable.FunctionView_isDrawNum,true);
-            mRadius = ta.getFloat(R.styleable.FunctionView_radius,10f);
-            mLineStrokeWidth = ta.getFloat(R.styleable.FunctionView_lineStrokeWidth,8f);
-            mCircleStrokeWidth = ta.getFloat(R.styleable.FunctionView_circleStrokeWidth,8f);
+            mRadius = ta.getDimension(R.styleable.FunctionView_radius,10f);
+            mLineStrokeWidth = ta.getDimension(R.styleable.FunctionView_lineStrokeWidth,8f);
+            mCircleStrokeWidth = ta.getDimension(R.styleable.FunctionView_circleStrokeWidth,8f);
             mHeightLineColor = ta.getColor(R.styleable.FunctionView_heightLineColor,Color.RED);
             mHeightCircleColor = ta.getColor(R.styleable.FunctionView_heightCircleColor,Color.GREEN);
             mLowLineColor = ta.getColor(R.styleable.FunctionView_lowLineColor,Color.RED);
             mLowCircleColor = ta.getColor(R.styleable.FunctionView_lowCircleColor,Color.GREEN);
-            mTextSize = ta.getFloat(R.styleable.FunctionView_textSize,16f);
+            mTextSize = ta.getDimension(R.styleable.FunctionView_textSize,16f);
             mTextColor = ta.getColor(R.styleable.FunctionView_textColor,Color.YELLOW);
         }
         mHeightLinePaint = new Paint();
         mHeightLinePaint.setStyle(Paint.Style.STROKE);
+        mHeightLinePaint.setAntiAlias(true);
         mHeightCirclePaint = new Paint();
         mHeightCirclePaint.setStyle(Paint.Style.STROKE);
+        mHeightCirclePaint.setAntiAlias(true);
         mLowLinePaint = new Paint();
         mLowLinePaint.setStyle(Paint.Style.STROKE);
+        mLowLinePaint.setAntiAlias(true);
         mLowCirclePaint = new Paint();
         mLowCirclePaint.setStyle(Paint.Style.STROKE);
+        mLowCirclePaint.setAntiAlias(true);
         mHeightLinePaint.setStrokeWidth(mLineStrokeWidth);
         mLowLinePaint.setStrokeWidth(mLineStrokeWidth);
         mHeightCirclePaint.setStrokeWidth(mCircleStrokeWidth);
@@ -425,20 +335,23 @@ public class FunctionView extends View {
         mTextPaint.setTextSize(mTextSize);
         mTextPaint.setColor(mTextColor);
         mTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        mTextPaint.setAntiAlias(true);
     }
 
     /**
      * 元素类
      */
     public static class Element {
-        public final float height;
-        public final float low;
+        public final int height;
+        public final int low;
         public final String title;
+        public final String type;
 
-        public Element(@NonNull float height, @NonNull float low,String title) {
+        public Element(@NonNull int height, @NonNull int low,String title,String type) {
             this.height = height;
             this.low = low;
             this.title = title;
+            this.type = type;
         }
     }
 
@@ -591,7 +504,6 @@ public class FunctionView extends View {
     }
 
     public void setElements(@NonNull List<Element> elements) {
-        Log.d(TAG, "setElements: ...");
         if (elements == null || elements.size() < 2) {
             throw new RuntimeException("elements size must >= 2");
         }
