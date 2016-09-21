@@ -1,4 +1,4 @@
-package cn.izouxiang.androidweather.custom_view;
+package cn.izouxiang.myview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -19,8 +19,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.List;
-
-import cn.izouxiang.androidweather.R;
 
 
 /**
@@ -310,6 +308,7 @@ public class FunctionView extends View {
             mLowCircleColor = ta.getColor(R.styleable.FunctionView_lowCircleColor,Color.GREEN);
             mTextSize = ta.getDimension(R.styleable.FunctionView_textSize,16f);
             mTextColor = ta.getColor(R.styleable.FunctionView_textColor,Color.YELLOW);
+            ta.recycle();
         }
         mHeightLinePaint = new Paint();
         mHeightLinePaint.setStyle(Paint.Style.STROKE);
